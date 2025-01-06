@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>TaskJDBC</artifactId>
+    <artifactId>TaskHibernate</artifactId>
     <version>1.1-SNAPSHOT</version>
 
     <scm>
         <connection>scm:git:git@github.com:kigibigi/task_1.1.3-jdbs.git</connection>
         <developerConnection>scm:git:git@github.com:kigibigi/task_1.1.3-jdbs.git</developerConnection>
-      <tag>TaskJDBC-1.0</tag>
+      <tag>TaskHibernate-2.0</tag>
   </scm>
 
     <build>
