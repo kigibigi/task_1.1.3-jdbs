@@ -7,15 +7,13 @@ import java.sql.SQLException;
 public class Util {
     // реализуйте настройку соеденения с БД
 
+    //        String hostname = "localhost";
+    private static final String userName = "root";
+    private static final String password = "root";
+    private static final String connectionURL = "jdbc:mysql://localhost:3306/usersdb";
+
     public static Connection getMyConnection() throws SQLException, ClassNotFoundException {
-//        String hostname = "localhost";
-        String userName = "root";
-        String password = "root";
-
-        String connectionURL = "jdbc:mysql://localhost:3306/usersdb";
-
         Connection connection = DriverManager.getConnection(connectionURL, userName, password);
-
         return connection;
     }
 }
