@@ -6,14 +6,16 @@ import java.sql.SQLException;
 
 public class Util {
     // реализуйте настройку соеденения с БД
+    private static final String USER_NAME = "root";
+    private static final String PASSWORD = "root";
+    private static final String CONNECTION_URL = "jdbc:mysql://localhost:3306/usersdb";
 
-    //        String hostname = "localhost";
-    private static final String userName = "root";
-    private static final String password = "root";
-    private static final String connectionURL = "jdbc:mysql://localhost:3306/usersdb";
-
-    public static Connection getMyConnection() throws SQLException, ClassNotFoundException {
-        Connection connection = DriverManager.getConnection(connectionURL, userName, password);
-        return connection;
+    public static Connection getMyConnection() {
+        try {
+            Connection connection = DriverManager.getConnection(CONNECTION_URL, USER_NAME, PASSWORD);
+            return connection;
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

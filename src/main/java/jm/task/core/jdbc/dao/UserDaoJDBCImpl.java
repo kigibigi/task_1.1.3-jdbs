@@ -11,10 +11,10 @@ public class UserDaoJDBCImpl implements UserDao {
 
     private static final String CREATE_USER_TABLE_SQL = """
             CREATE TABLE user(
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                name VARCHAR(30),
-                last_name VARCHAR(35),
-                age INT
+                id          INT PRIMARY KEY AUTO_INCREMENT,
+                name        VARCHAR(30),
+                last_name   VARCHAR(35),
+                age         INT
             )
             """;
 
@@ -43,35 +43,32 @@ public class UserDaoJDBCImpl implements UserDao {
     public UserDaoJDBCImpl() {
     }
 
-    private static Connection getUtilConnection() throws SQLException, ClassNotFoundException {
-        Connection connection = Util.getMyConnection();
-        return connection;
-    }
+    Connection connection = Util.getMyConnection();
 
     public void createUsersTable() {
-        try (PreparedStatement preparedStatement = getUtilConnection().prepareStatement(CREATE_USER_TABLE_SQL)) {
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(CREATE_USER_TABLE_SQL))
+        {
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
             System.out.println("Таблица 'user' уже существует");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
 
     public void dropUsersTable() {
         try (PreparedStatement preparedStatement =
-                     getUtilConnection().prepareStatement(DROP_USER_TABLE_SQL))
+                     connection.prepareStatement(DROP_USER_TABLE_SQL))
         {
             preparedStatement.executeUpdate();
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             System.out.println("Таблицы 'user' не существует");
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
         try (PreparedStatement preparedStatement =
-                     getUtilConnection().prepareStatement(SAVE_USER_SQL))
+                     connection.prepareStatement(SAVE_USER_SQL))
         {
             //устанавливаю значения для полей
             preparedStatement.setString(1, name);
@@ -81,39 +78,36 @@ public class UserDaoJDBCImpl implements UserDao {
             //исполнение запроса
             preparedStatement.executeUpdate();
 
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void removeUserById(long id) {
         try (PreparedStatement preparedStatement =
-                     getUtilConnection().prepareStatement(DELETE_SQL))
+                     connection.prepareStatement(DELETE_SQL))
         {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
 
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 }
 
     public List<User> getAllUsers() {
         try (PreparedStatement preparedStatement =
-                     getUtilConnection().prepareStatement(FIND_ALL_USER_SQL))
+                     connection.prepareStatement(FIND_ALL_USER_SQL))
         {
-
             ResultSet resultSet = preparedStatement.executeQuery();
-
             List<User> users = new ArrayList<>();
 
             while (resultSet.next()) {
                 users.add(buildUser(resultSet));
             }
-
             return users;
 
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -131,15 +125,12 @@ public class UserDaoJDBCImpl implements UserDao {
         return user;
     }
 
-    //добавить игнорирование исключения в случае отсутствия таблицы
     public void cleanUsersTable() {
         try (PreparedStatement preparedStatement =
-                     getUtilConnection().prepareStatement(CLEAN_USER_TABLE_SQL))
+                     connection.prepareStatement(CLEAN_USER_TABLE_SQL))
         {
-
             preparedStatement.executeUpdate();
-
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
