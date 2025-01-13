@@ -15,7 +15,8 @@ public class UserDaoHibernateImpl implements UserDao {
 
     }
 
-    SessionFactory sessionFactory = Util.getSessionFactory();
+    private SessionFactory sessionFactory = new Util().getSessionFactory();
+
     private static final String CREATE_USER_TABLE_SQL = """
             CREATE TABLE user
             (
@@ -64,7 +65,6 @@ public class UserDaoHibernateImpl implements UserDao {
             session.save(user);
             session.getTransaction().commit();
         } catch (Exception ex) {
-            session.getTransaction().rollback();
             throw ex;
         }
     }
@@ -79,7 +79,6 @@ public class UserDaoHibernateImpl implements UserDao {
 
             session.getTransaction().commit();
         } catch (Exception ex) {
-            session.getTransaction().rollback();
             throw ex;
         }
     }
@@ -107,7 +106,6 @@ public class UserDaoHibernateImpl implements UserDao {
 
             session.getTransaction().commit();
         } catch (Exception ex) {
-            session.getTransaction().rollback();
             throw ex;
         }
     }
