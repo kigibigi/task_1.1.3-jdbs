@@ -46,69 +46,64 @@ public class UserDaoJDBCImpl implements UserDao {
     private Connection connection = Util.getMyConnection();
 
     public void createUsersTable() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_USER_TABLE_SQL))
-        {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_USER_TABLE_SQL)) {
             preparedStatement.executeUpdate();
-
-        } catch (Exception e) {
-            //ignore
+        } catch (SQLException e) {
+            if(e.getClass() == SQLSyntaxErrorException.class &&
+                e.getMessage().equals("Table 'user' already exists")) {
+                System.err.println("This table already exists");
+            } else {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public void dropUsersTable() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(DROP_USER_TABLE_SQL))
-        {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DROP_USER_TABLE_SQL)) {
             preparedStatement.executeUpdate();
-        } catch (Exception e) {
-            //ignore
+        } catch (SQLException e) {
+            if(e.getClass() == SQLSyntaxErrorException.class &&
+               e.getMessage().startsWith("Unknown table")) {
+                System.err.println("Unknown table");
+            } else {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(SAVE_USER_SQL))
-        {
-            //устанавливаю значения для полей
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SAVE_USER_SQL)) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
 
-            //исполнение запроса
             preparedStatement.executeUpdate();
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void removeUserById(long id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL))
-        {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 }
 
     public List<User> getAllUsers() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_USER_SQL))
-        {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_USER_SQL)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             List<User> users = new ArrayList<>();
 
             while (resultSet.next()) {
-                //получение user'а
-                long id = resultSet.getByte(1);
-
                 User user = new User(
+                        resultSet.getLong(1),
                         resultSet.getString("name"),
                         resultSet.getString("last_name"),
                         resultSet.getByte("age")
                 );
-
-                user.setId(id);
-                // добавление в лист
                 users.add(user);
             }
             return users;
@@ -118,10 +113,8 @@ public class UserDaoJDBCImpl implements UserDao {
         }
     }
 
-
     public void cleanUsersTable() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(CLEAN_USER_TABLE_SQL))
-        {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(CLEAN_USER_TABLE_SQL)) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
