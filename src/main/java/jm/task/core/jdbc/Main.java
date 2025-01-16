@@ -39,10 +39,8 @@ public class Main {
         // Очистка таблицы User(ов)
         System.out.println();
         userService.cleanUsersTable();
-//        System.out.println("Таблица пуста!");
 
         // Удаление таблицы
         userService.dropUsersTable();
-//        System.out.println("Таблица удалена!");
     }
 }

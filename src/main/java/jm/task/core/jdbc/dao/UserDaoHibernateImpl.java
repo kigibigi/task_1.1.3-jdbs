@@ -5,9 +5,12 @@ import jm.task.core.jdbc.util.Util;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 import javax.persistence.PersistenceException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
@@ -37,7 +40,12 @@ public class UserDaoHibernateImpl implements UserDao {
             session.getTransaction().commit();
 
         } catch (Exception ex) {
-            // ignore
+            // ???
+            if(ex.getCause().getCause().getMessage().equals("Table 'user' already exists")) {
+
+            } else {
+                throw ex;
+            }
         }
     }
 
@@ -50,14 +58,18 @@ public class UserDaoHibernateImpl implements UserDao {
 
             session.getTransaction().commit();
         } catch (Exception ex) {
-//            (PersistenceException ex)
+            // ???
+            if(ex.getCause().getCause().getMessage().startsWith("Unknown table")) {
+
+            } else {
+                throw ex;
+            }
         }
     }
 
     @Override
     public void cleanUsersTable() {
-        try(Session session = sessionFactory.openSession())
-        {
+        try(Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
             session.createQuery("DELETE FROM User").executeUpdate();
@@ -73,32 +85,34 @@ public class UserDaoHibernateImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         User user = new User(name, lastName, age);
 
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
-            session.save(user);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            session.getTransaction().rollback();
-            throw ex;
-        } finally {
-            session.close();
+        try(Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            try {
+                session.save(user);
+                transaction.commit();
+            } catch (Exception ex) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                throw ex;
+            }
         }
     }
 
     @Override
     public void removeUserById(long id) {
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
-            User removeUser = (User) session.find(User.class, id);
-            session.remove(removeUser);
-
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            throw ex;
-        } finally {
-            session.close();
+        try(Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            try {
+                User removeUser = (User) session.find(User.class, id);
+                session.remove(removeUser);
+                transaction.commit();
+            } catch (Exception ex) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                throw ex;
+            }
         }
     }
 
@@ -106,18 +120,20 @@ public class UserDaoHibernateImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
 
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            try {
+                users = (List<User>) session.createQuery("from User order by id").list();
 
-            users = (List<User>) session.createQuery("from User order by id").list();
-
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            throw ex;
-        } finally {
-            session.close();
+                session.getTransaction().commit();
+                System.out.println(transaction.toString());
+            } catch (Exception ex) {
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                throw ex;
+            }
+            return users;
         }
-        return users;
     }
 }
