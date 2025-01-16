@@ -40,12 +40,7 @@ public class UserDaoHibernateImpl implements UserDao {
             session.getTransaction().commit();
 
         } catch (Exception ex) {
-            // ???
-            if(ex.getCause().getCause().getMessage().equals("Table 'user' already exists")) {
-
-            } else {
-                throw ex;
-            }
+            ex.printStackTrace();
         }
     }
 
@@ -58,12 +53,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
             session.getTransaction().commit();
         } catch (Exception ex) {
-            // ???
-            if(ex.getCause().getCause().getMessage().startsWith("Unknown table")) {
-
-            } else {
-                throw ex;
-            }
+            ex.printStackTrace();
         }
     }
 
