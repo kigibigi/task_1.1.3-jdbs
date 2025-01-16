@@ -49,12 +49,7 @@ public class UserDaoJDBCImpl implements UserDao {
         try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_USER_TABLE_SQL)) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            if(e.getClass() == SQLSyntaxErrorException.class &&
-                e.getMessage().equals("Table 'user' already exists")) {
-                System.err.println("This table already exists");
-            } else {
-                throw new RuntimeException(e);
-            }
+            e.printStackTrace();
         }
     }
 
@@ -62,12 +57,7 @@ public class UserDaoJDBCImpl implements UserDao {
         try (PreparedStatement preparedStatement = connection.prepareStatement(DROP_USER_TABLE_SQL)) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            if(e.getClass() == SQLSyntaxErrorException.class &&
-               e.getMessage().startsWith("Unknown table")) {
-                System.err.println("Unknown table");
-            } else {
-                throw new RuntimeException(e);
-            }
+            e.printStackTrace();
         }
     }
 
@@ -99,7 +89,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
             while (resultSet.next()) {
                 User user = new User(
-                        resultSet.getLong(1),
+                        resultSet.getLong("id"),
                         resultSet.getString("name"),
                         resultSet.getString("last_name"),
                         resultSet.getByte("age")
